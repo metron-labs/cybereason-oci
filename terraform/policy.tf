@@ -9,6 +9,7 @@ resource "oci_identity_policy" "OCI-CR-policy-1" {
   statements = [
     "Allow service FAAS to read repos in tenancy",
     "Allow service FAAS to use virtual-network-family in tenancy",
+    "Allow service cloudguard to manage user in tenancy",
     "Allow dynamic-group ${oci_identity_dynamic_group.cr-functions-group-1.name} to read virtual-network-family in tenancy",
     "Allow dynamic-group ${oci_identity_dynamic_group.cr-functions-group-1.name} to read instance-family in tenancy",
     "Allow dynamic-group ${oci_identity_dynamic_group.cr-functions-group-1.name} to use secret-family in tenancy",
