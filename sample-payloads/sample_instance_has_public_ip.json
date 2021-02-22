@@ -1,0 +1,34 @@
+{
+    "eventType": "com.oraclecloud.cloudguard.problemdetected",
+    "cloudEventsVersion": "0.1",
+    "eventTypeVersion": "2.0",
+    "source": "CloudGuardResponderEngine",
+    "eventTime": "2020-10-01T19:48:20Z",
+    "contentType": "application/json",
+    "data": {
+        "compartmentId": "<your_compartment_id>",
+        "compartmentName": "West",
+        "resourceName": "Instance has a public IP address",
+        "resourceId": "ocid1.cloudguardproblem.oc1.iad.amaaaaaa24o7ld2quz2leoiolm7qeubdqyr6lftim4u4grilrbzgct5dbi5q",
+        "additionalDetails": {
+            "tenantId": "<your_tenancy_id>",
+            "problemDescription": "Checks public IP only",
+            "riskLevel": "HIGH",
+            "problemRecommendation": "Carefully consider allowing internet access to any instances. For example, you do not want to accidentally allow internet access to sensitive database instances.",
+            "status": "OPEN",
+            "problemType": "CONFIG_CHANGE",
+            "resourceName": "cgtest",
+            "resourceId": "<your_instance_id>",
+            "resourceType": "Instance",
+            "targetId": "ocid1.cloudguardtarget.oc1.iad.amaaaaaa24o7ldyagchtqvutyyzjyz6igl366fy5rxknfd3qyf4tstbo6noq",
+            "labels": "COMPUTE, CIS3",
+            "firstDetected": "2020-10-01T19:32:48.683Z",
+            "lastDetected": "2020-10-01T19:32:48.683Z",
+            "region": "us-ashburn-1"
+        }
+    },
+    "eventID": "af243109-37d9-46d5-9b12-8f1ca6acba9e",
+    "extensions": {
+        "compartmentId": "<your_compartment_id>"
+    }
+}
