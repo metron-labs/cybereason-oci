@@ -98,7 +98,7 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
             user_was_disabled_message += ' The account associated with the username was disabled'
 
     if num_suspicions > 0 and handler_options['send_notifications'] and send_notifications:
-        send_notification(signer, ctx, body, oci_username, user_was_disabled)
+        send_notification(signer, ctx, body, oci_username, user_was_disabled_message)
 
     return response.Response(
         ctx,
