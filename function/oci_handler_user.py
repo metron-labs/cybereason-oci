@@ -95,7 +95,7 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
             print('Disabling user {username} in Oracle'.format(username=oci_username), flush=True)
             oci_disable_user(signer, body["data"]["resourceId"])
             user_was_disabled_message += ' The account associated with the username was disabled'
-        print(user_was_disabled_message, flush=True)
+    print(user_was_disabled_message, flush=True)
 
     if num_suspicions > 0 and handler_options['send_notifications'] and send_notifications:
         send_notification(signer, ctx, body, oci_username, user_was_disabled_message)
