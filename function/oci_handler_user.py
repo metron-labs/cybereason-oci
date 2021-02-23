@@ -19,7 +19,10 @@ from constants import *
 def send_notification(signer, ctx, body, username, message_body):
     try:
         ctx_data = dict(ctx.Config())
-        topic_id = ctx_data['ONS_TOPIC_OCID']
+        topic_id = ctx_data.get('ONS_TOPIC_OCID')
+        if not topic_id:
+            print('WARNING: No ONS topic OCID provided. Cannot publish message to topic.', flush=True)
+            return
         cloud_guard_problem = body["data"]["resourceName"]
         message_title = 'Suspicious user activity detected'
         notification_message = {"default": "Cloud Guard Finding", "body": message_body, "title": message_title} 
@@ -75,9 +78,9 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
         port = ctx_data['CYBEREASON_PORT']
         username = ctx_data['CYBEREASON_USERNAME']
         password = get_password_from_secrets(signer, ctx_data['CYBEREASON_SECRET_OCID'])
-        disable_user = ctx_data['DISABLE_USER'].lower()
-        send_notifications = ctx_data['SEND_NOTIFICATIONS'].lower()
-        never_disable_users = json.loads(ctx_data['NEVER_DISABLE_USERS'])
+        disable_user = ctx_data.get('DISABLE_USER', 'False').lower()
+        send_notifications = ctx_data.get('SEND_NOTIFICATIONS', 'False').lower()
+        never_disable_users = json.loads(ctx_data.get('NEVER_DISABLE_USERS', '[]'))
     except Exception as ex:
         print("ERROR: Failed to retrieve function configuration data", ex, flush=True)
         raise
