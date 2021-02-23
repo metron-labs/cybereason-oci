@@ -50,6 +50,10 @@ variable cybereason_disable_user {
   default = "False"
   description = "If True, any user that is flagged as suspicious in the Cybereason console will be disabled in Oracle"
 }
+variable oci_never_disable_users {
+  default = "[\"user@example.com\"]"
+  description = "An array of users which we will never disable. Important so that tenant administrators do not get accidentally locked out"
+}
 
 # The Cybereason Responder function image contains code to run the query and remediation actions. You will need to
 # first get the function installed and accessible in the compartment where you are going to apply the
