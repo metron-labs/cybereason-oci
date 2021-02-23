@@ -79,7 +79,7 @@ def machine_event_handler(ctx, handler_options, data: io.BytesIO=None):
         username = ctx_data['CYBEREASON_USERNAME']
         password = get_password_from_secrets(signer, ctx_data['CYBEREASON_SECRET_OCID'])
         cr_isolate_machine = ctx_data.get('ISOLATE_MACHINE', 'False').lower()
-        send_notifications = ctx_data.get('SEND_NOTIFICATIONS', 'False'].lower()
+        send_notifications = ctx_data.get('SEND_NOTIFICATIONS', 'False').lower()
     except Exception as ex:
         print("ERROR: Failed to retrieve function configuration data", ex, flush=True)
         raise
