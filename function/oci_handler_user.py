@@ -86,7 +86,7 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
     cr_connection = get_cybereason_connection(server, port, username, password)
     # Check if the user has any suspicions
     num_suspicions = 1 # get_user_suspicions(cr_connection, oci_username)
-    user_was_disabled_message = 'Cybereason detected {num_suspicions} suspicions on user {username}.'.format(username=username, num_suspicions=num_suspicions)
+    user_was_disabled_message = 'Cybereason detected {num_suspicions} suspicions on user {username}.'.format(username=oci_username, num_suspicions=num_suspicions)
     if num_suspicions > 0 and handler_options['disable_user'] and disable_user:
         if oci_username in never_disable_users:
             user_was_disabled_message += ', but it is in the list of users specified by NEVER_DISABLE_USERS.'
