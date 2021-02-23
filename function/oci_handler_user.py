@@ -86,9 +86,8 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
     cr_connection = get_cybereason_connection(server, port, username, password)
     # Check if the user has any suspicions
     num_suspicions = 1 # get_user_suspicions(cr_connection, oci_username)
-    user_was_disabled_message = ''
+    user_was_disabled_message = 'Cybereason detected {num_suspicions} suspicions on user {username}.'.format(username=username, num_suspicions=num_suspicions)
     if num_suspicions > 0 and handler_options['disable_user'] and disable_user:
-        user_was_disabled_message = 'Cybereason detected suspicions on user {username}.'.format(username=username)
         if oci_username in never_disable_users:
             user_was_disabled_message += ', but it is in the list of users specified by NEVER_DISABLE_USERS.'
             user_was_disabled_message += '\nWe will not disable the user account.'
@@ -96,6 +95,7 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
             print('Disabling user {username} in Oracle'.format(username=oci_username))
             oci_disable_user(signer, body["data"]["resourceId"])
             user_was_disabled_message += ' The account associated with the username was disabled'
+        print(user_was_disabled_message)
 
     if num_suspicions > 0 and handler_options['send_notifications'] and send_notifications:
         send_notification(signer, ctx, body, oci_username, user_was_disabled_message)
