@@ -68,13 +68,17 @@ The Terraform template requires the user to configure a number of variables. Mak
 |cybereason_send_notifications|If True, then the Cybereason Responder will send notifications to a specified ONS topic|No|True|
 |cybereason_ons_topic_ocid|The OCID of ONS Topic where we will send notifications.|No|ocid1.onstopic.oc1.ap-mumbai-1.....|
 |cybereason_isolate_machine|If True, any machine flagged as suspicious will be isolated via the Cybereason sensor|No|True|
-|cybereason_disable_user|If True, any user that is flagged as suspicious in the Cybereason console will be disabled in Oracle|Yes|True|
+|cybereason_disable_user|If True, any user that is flagged as suspicious in the Cybereason console will be disabled in Oracle|No|False|
+|oci_never_disable_users|An array of users which we will never disable. Important so that tenant administrators do not get accidentally locked out|No|["user@example.com"]
 |function_subnet|The VCN Subnet OCID of the subnet the function will execute in.|Yes|ocid1.vcn.oc1.ap-mumbai-1.....|
 |function_image|The function image that contains the Cybereason Responder code|Yes|bom.ocir.io/...../...../cybereason-responder:0.0.1|
 |function_image_digest|The digest of the function image of the Cybereason Responder code. This is of the format sha256:xxx|Yes|sha256:......|
 |target_configuration_detector_recipe_ocid|The OCID of the Target Configuration Detector Recipe to be used|Yes|ocid1.cloudguarddetectorrecipe.oc1.ap-mumbai-1....|
 |target_activity_detector_recipe_ocid|The OCID of the Target Activity Detector Recipe to be used|Yes|ocid1.cloudguarddetectorrecipe.oc1.ap-mumbai-1....|
 |target_responder_recipe_ocid|The OCID of the Target Responder Recipe to be used|Yes|ocid1.cloudguardresponderrecipe.oc1.ap-mumbai-1.....|
+
+## Important note on disabling users
+There is a terraform variable `oci_never_disable_users`. Any username that is in this array will not be disabled, even if Cybereason finds suspicions on it. It is important to put at least one administrator username for your Oracle tenancy to ensure that you do not get locked out of your tenancy. An example value for `oci_never_disable_users` containing 2 users is `["user1@example.com", "user2@example.com"]`.
 
 ## Configure the stack
 1. Go to `Hamburger Menu --> Resource Manager --> Stacks` and create a stack in the compartment where you are going to install the function.

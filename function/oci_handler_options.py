@@ -107,21 +107,21 @@ CLOUD_GUARD_HANDLERS = {
     'USER HAS API KEYS': {
         'handler': user_event_handler,
         'options': {
-            'disable_user': False,
+            'disable_user': True,
             'send_notifications': True
         }
     },
     'USER ADDED TO GROUP': {
         'handler': user_event_handler,
         'options': {
-            'disable_user': False,
+            'disable_user': True,
             'send_notifications': True
         }
     },
     'SECURITY POLICY MODIFIED': {
         'handler': user_event_handler,
         'options': {
-            'disable_user': False,
+            'disable_user': True,
             'send_notifications': True
         }
     }

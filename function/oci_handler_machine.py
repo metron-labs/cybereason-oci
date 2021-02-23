@@ -37,7 +37,10 @@ def get_private_ips(machine_type, signer, compartment_id, resource_id):
 def send_notification(signer, ctx, body, remediated):
     try:
         ctx_data = dict(ctx.Config())
-        topic_id = ctx_data['ONS_TOPIC_OCID']
+        topic_id = ctx_data.get('ONS_TOPIC_OCID')
+        if not topic_id:
+            print('WARNING: No ONS topic OCID provided. Cannot publish message to topic.', flush=True)
+            return
         cloud_guard_problem = body["data"]["resourceName"]
         if remediated:
             message_title = "Cloud Guard Problem " + cloud_guard_problem + " Isolated by Cybereason"
@@ -75,8 +78,8 @@ def machine_event_handler(ctx, handler_options, data: io.BytesIO=None):
         port = ctx_data['CYBEREASON_PORT']
         username = ctx_data['CYBEREASON_USERNAME']
         password = get_password_from_secrets(signer, ctx_data['CYBEREASON_SECRET_OCID'])
-        cr_isolate_machine = ctx_data['ISOLATE_MACHINE'].lower()
-        send_notifications = ctx_data['SEND_NOTIFICATIONS'].lower()
+        cr_isolate_machine = ctx_data.get('ISOLATE_MACHINE', 'False').lower()
+        send_notifications = ctx_data.get('SEND_NOTIFICATIONS', 'False').lower()
     except Exception as ex:
         print("ERROR: Failed to retrieve function configuration data", ex, flush=True)
         raise

@@ -16,15 +16,15 @@ from cybereason_user_suspicions import get_user_suspicions
 from oci_utils import *
 from constants import *
 
-def send_notification(signer, ctx, body, username, user_was_disabled):
+def send_notification(signer, ctx, body, username, message_body):
     try:
         ctx_data = dict(ctx.Config())
-        topic_id = ctx_data['ONS_TOPIC_OCID']
+        topic_id = ctx_data.get('ONS_TOPIC_OCID')
+        if not topic_id:
+            print('WARNING: No ONS topic OCID provided. Cannot publish message to topic.', flush=True)
+            return
         cloud_guard_problem = body["data"]["resourceName"]
         message_title = 'Suspicious user activity detected'
-        message_body = 'Cybereason detected suspicions on user {username}'.format(username=username)
-        if user_was_disabled:
-            message_body = message_body + '\nThe account associated with the username was disabled'
         notification_message = {"default": "Cloud Guard Finding", "body": message_body, "title": message_title} 
         ons = oci.ons.NotificationDataPlaneClient(config={}, signer=signer)
         ons.publish_message(topic_id, notification_message)
@@ -49,6 +49,22 @@ def get_user_from_payload(event_payload):
     oci_username = user_extractor.get(event_name, lambda: 'ERROR: No user extractor defined for event ' + event_name)()
     return oci_username
 
+def oci_disable_user(signer, problem_id):
+    try:
+        cloud_guard_client = oci.cloud_guard.CloudGuardClient(config={}, signer=signer)
+    except Exception as ex: 
+        print("ERROR: failed to create cloud guard client", ex, flush=True)
+        raise
+    
+    try:
+        trigger_responder_details = oci.cloud_guard.models.TriggerResponderDetails(responder_rule_id='DISABLE_IAM_USER')
+        response = cloud_guard_client.trigger_responder(problem_id, trigger_responder_details)
+        print(response.data, flush=True)
+    except Exception as ex:
+        print("ERROR: Failed to disable user with problem id: ", problem_id)
+        print("ERROR: Failure Message: ", ex, flush=True)
+        raise
+
 def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
 
     signer = get_signer()
@@ -62,8 +78,9 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
         port = ctx_data['CYBEREASON_PORT']
         username = ctx_data['CYBEREASON_USERNAME']
         password = get_password_from_secrets(signer, ctx_data['CYBEREASON_SECRET_OCID'])
-        disable_user = ctx_data['DISABLE_USER'].lower()
-        send_notifications = ctx_data['SEND_NOTIFICATIONS'].lower()
+        disable_user = ctx_data.get('DISABLE_USER', 'False').lower()
+        send_notifications = ctx_data.get('SEND_NOTIFICATIONS', 'False').lower()
+        never_disable_users = json.loads(ctx_data.get('NEVER_DISABLE_USERS', '[]'))
     except Exception as ex:
         print("ERROR: Failed to retrieve function configuration data", ex, flush=True)
         raise
@@ -72,13 +89,19 @@ def user_event_handler(ctx, handler_options, data: io.BytesIO=None):
     cr_connection = get_cybereason_connection(server, port, username, password)
     # Check if the user has any suspicions
     num_suspicions = get_user_suspicions(cr_connection, oci_username)
-    user_was_disabled = False
+    user_was_disabled_message = 'Cybereason detected {num_suspicions} suspicions on user {username}'.format(username=oci_username, num_suspicions=num_suspicions)
     if num_suspicions > 0 and handler_options['disable_user'] and disable_user:
-        print('Disabling user {username} in Oracle'.format(username=username))
-        user_was_disabled = True
-        # TODO: Oracle
+        if oci_username in never_disable_users:
+            user_was_disabled_message += ', but it is in the list of users specified by NEVER_DISABLE_USERS.'
+            user_was_disabled_message += '\nWe will not disable the user account.'
+        else:
+            print('Disabling user {username} in Oracle'.format(username=oci_username), flush=True)
+            oci_disable_user(signer, body["data"]["resourceId"])
+            user_was_disabled_message += ' The account associated with the username was disabled'
+    print(user_was_disabled_message, flush=True)
+
     if num_suspicions > 0 and handler_options['send_notifications'] and send_notifications:
-        send_notification(signer, ctx, body, oci_username, user_was_disabled)
+        send_notification(signer, ctx, body, oci_username, user_was_disabled_message)
 
     return response.Response(
         ctx,

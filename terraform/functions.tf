@@ -34,6 +34,7 @@ resource "oci_functions_function" "cybereason_responder_function" {
     "ONS_TOPIC_OCID" = var.cybereason_ons_topic_ocid
     "ISOLATE_MACHINE" = var.cybereason_isolate_machine
     "DISABLE_USER" = var.cybereason_disable_user
+    "NEVER_DISABLE_USERS": var.oci_never_disable_users
   }
   image_digest       = var.function_image_digest
   timeout_in_seconds = "60"
