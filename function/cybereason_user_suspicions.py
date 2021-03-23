@@ -21,8 +21,29 @@ def get_user_suspicions(cr_connection, username):
                     "filters": [
                         {
                             "facetName": "elementDisplayName",
-                            "values": [username],
-                            "filterType": "MatchesWildcard"
+                            "filterType": "ContainsIgnoreCase",
+                            "values": [username]
+                        }
+                    ],
+                    "connectionFeature": {
+                        "elementInstanceType": "User",
+                        "featureName": "ownerMachine"
+                    }
+                },
+                {
+                    "requestedType": "Machine",
+                    "filters": [],
+                    "connectionFeature": {
+                        "elementInstanceType": "Machine",
+                        "featureName": "processes"
+                    }
+                },
+                {
+                    "requestedType": "Process",
+                    "filters": [
+                        {
+                            "facetName": "hasSuspicions",
+                            "values": [True]
                         }
                     ],
                     "isResult": True
@@ -34,22 +55,19 @@ def get_user_suspicions(cr_connection, username):
             "templateContext": "SPECIFIC",
             "queryTimeout": 120000,
             "customFields": [
-                "domain",
                 "ownerMachine",
-                "ownerOrganization.name",
-                "isLocalSystem",
                 "emailAddress",
                 "elementDisplayName"
             ]
         }
         res = cr_connection['session'].post(url, json=query, headers=api_headers, timeout=CR_REQUEST_TIMEOUT_SEC)
-        machines_dict = res.json()["data"]["resultIdToElementDataMap"]
-        for machine_id, machine_details in machines_dict.items():
+        users_dict = res.json()["data"]["resultIdToElementDataMap"]
+        for user_id, user_details in users_dict.items():
             print('User {username} has {suspicions} suspicions on machine {machine}'.format(
                 username=username,
-                suspicions=machine_details['suspicionCount'],
-                machine=machine_details['elementValues']['ownerMachine']['elementValues'][0]['name']), flush=True)
-            num_suspicions += machine_details['suspicionCount']
+                suspicions=user_details['suspicionCount'],
+                machine=user_details['elementValues']['ownerMachine']['elementValues'][0]['name']), flush=True)
+            num_suspicions += user_details['suspicionCount']
 
     except Exception as e:
         print('ERROR: Failed to get suspicion count for the username {username}'.format(username=username), e, flush=True)
